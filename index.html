@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DVA-C02 Quiz</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --text: #1d2330; --muted: #626b7a; --line: #dfe3ea;
+    --accent: #e8810c; --accent-soft: #fdf0e0; --good: #1f8a4c; --good-soft: #e3f4ea;
+    --bad: #c63b32; --bad-soft: #fbe6e4; --sel: #2f6fdb; --sel-soft: #e6eefc;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151b; --card: #1b2029; --text: #e6e9ef; --muted: #98a1b2; --line: #2d3441;
+      --accent: #f5a043; --accent-soft: #3a2a17; --good: #48c07a; --good-soft: #17301f;
+      --bad: #ef6b61; --bad-soft: #3a1c1a; --sel: #6d9cf0; --sel-soft: #1c2940;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151b; --card: #1b2029; --text: #e6e9ef; --muted: #98a1b2; --line: #2d3441;
+    --accent: #f5a043; --accent-soft: #3a2a17; --good: #48c07a; --good-soft: #17301f;
+    --bad: #ef6b61; --bad-soft: #3a1c1a; --sel: #6d9cf0; --sel-soft: #1c2940;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 20px 16px 60px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  header h1 { font-size: 20px; margin: 0; }
+  header h1 span { color: var(--accent); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  h2 { font-size: 17px; margin: 0 0 12px; }
+  .muted { color: var(--muted); font-size: 14px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+  .stat { border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .stat b { display: block; font-size: 22px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+  label.opt-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; cursor: pointer; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex-wrap: wrap; }
+  .seg button { border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--text);
+    padding: 8px 14px; cursor: pointer; font: inherit; font-size: 14px; }
+  .seg button:last-child { border-right: 0; }
+  .seg button.on { background: var(--accent); color: #fff; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { border: 1px solid var(--line); background: transparent; color: var(--text); border-radius: 999px;
+    padding: 4px 11px; font: inherit; font-size: 13px; cursor: pointer; }
+  .chip.on { background: var(--sel-soft); border-color: var(--sel); color: var(--sel); }
+  .btn { border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 8px;
+    padding: 9px 16px; font: inherit; font-size: 15px; cursor: pointer; }
+  .btn:hover { border-color: var(--muted); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  input[type=number] { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); width: 90px; }
+  .progress { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 6px 0 14px; }
+  .progress > div { height: 100%; background: var(--accent); transition: width .2s; }
+  .qhead { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .tag { font-size: 12px; padding: 2px 8px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); margin-right: 4px; }
+  .qtext { white-space: pre-wrap; font-size: 17px; margin: 14px 0 6px; }
+  .hint { font-size: 13px; font-weight: 600; color: var(--sel); margin-bottom: 10px; }
+  .option { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; border: 1.5px solid var(--line);
+    background: transparent; color: var(--text); border-radius: 10px; padding: 12px 14px; margin: 8px 0; font: inherit; cursor: pointer; }
+  .option:hover:not(:disabled) { border-color: var(--sel); }
+  .option .key { flex: 0 0 28px; height: 28px; border-radius: 7px; border: 1.5px solid var(--line); display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+  .option.selected { border-color: var(--sel); background: var(--sel-soft); }
+  .option.selected .key { background: var(--sel); color: #fff; border-color: var(--sel); }
+  .option.correct { border-color: var(--good); background: var(--good-soft); }
+  .option.correct .key { background: var(--good); color: #fff; border-color: var(--good); }
+  .option.wrong { border-color: var(--bad); background: var(--bad-soft); }
+  .option.wrong .key { background: var(--bad); color: #fff; border-color: var(--bad); }
+  .option:disabled { cursor: default; }
+  .feedback { border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 15px; }
+  .feedback.good { background: var(--good-soft); border-left: 4px solid var(--good); }
+  .feedback.bad { background: var(--bad-soft); border-left: 4px solid var(--bad); }
+  .feedback b { display: block; margin-bottom: 4px; }
+  .nav { display: flex; justify-content: space-between; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 6px; }
+  .grid button { border: 1px solid var(--line); background: transparent; color: var(--text); border-radius: 6px; padding: 6px 0; font: inherit; font-size: 13px; cursor: pointer; }
+  .grid button.answered { background: var(--sel-soft); border-color: var(--sel); }
+  .grid button.flag { box-shadow: inset 0 -3px 0 var(--accent); }
+  .grid button.cur { outline: 2px solid var(--accent); }
+  .grid button.ok { background: var(--good-soft); border-color: var(--good); }
+  .grid button.no { background: var(--bad-soft); border-color: var(--bad); }
+  .timer { font-variant-numeric: tabular-nums; font-weight: 700; }
+  .timer.low { color: var(--bad); }
+  .score { font-size: 44px; font-weight: 800; margin: 0; }
+  .pass { color: var(--good); } .fail { color: var(--bad); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  td, th { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); }
+  .bar { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; min-width: 80px; }
+  .bar > div { height: 100%; }
+  .review-item { border-top: 1px solid var(--line); padding: 14px 0; }
+  .review-item:first-child { border-top: 0; }
+  .icon-btn { border: 1px solid var(--line); background: transparent; color: var(--text); border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; font-size: 14px; }
+  .icon-btn.on { color: var(--accent); border-color: var(--accent); }
+  .hidden { display: none !important; }
+  kbd { font-size: 12px; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+  @media (max-width: 560px) { .qtext { font-size: 16px; } .score { font-size: 36px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>AWS <span>DVA-C02</span> Quiz</h1>
+    <button class="icon-btn" id="themeBtn" title="Toggle theme">◐ Theme</button>
+  </header>
+
+  <!-- ===================== START ===================== -->
+  <section id="start">
+    <div class="card">
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <div class="card">
+      <h2>Mode</h2>
+      <div class="seg" id="modeSeg">
+        <button data-v="practice" class="on">Practice (instant feedback)</button>
+        <button data-v="exam">Exam simulation (timed)</button>
+      </div>
+      <p class="muted" id="modeDesc"></p>
+
+      <h2 style="margin-top:18px">Question pool</h2>
+      <div class="seg" id="poolSeg">
+        <button data-v="all" class="on">All</button>
+        <button data-v="file">From my .txt</button>
+        <button data-v="extra">Extra DVA-C02</button>
+        <button data-v="wrong">My mistakes</button>
+        <button data-v="flag">Bookmarked</button>
+        <button data-v="unseen">Not answered yet</button>
+      </div>
+
+      <h2 style="margin-top:18px">Topics <button class="chip" id="allTopics" style="margin-left:6px">select all / none</button></h2>
+      <div class="chips" id="topicChips"></div>
+
+      <div class="row" style="margin-top:18px">
+        <label class="opt-inline">Questions: <input type="number" id="count" min="1" value="20"></label>
+        <label class="opt-inline" id="timeWrap">Minutes: <input type="number" id="minutes" min="1" value="130"></label>
+      </div>
+      <div class="row">
+        <label class="opt-inline"><input type="checkbox" id="shuffleQ" checked> Shuffle questions</label>
+        <label class="opt-inline"><input type="checkbox" id="shuffleO"> Shuffle answer options</label>
+      </div>
+      <p class="muted" id="poolInfo"></p>
+      <div class="row">
+        <button class="btn primary" id="startBtn">Start quiz</button>
+        <button class="btn" id="resetBtn">Reset my progress</button>
+      </div>
+      <p class="muted">Keys: <kbd>A</kbd>–<kbd>E</kbd> / <kbd>1</kbd>–<kbd>5</kbd> select · <kbd>Enter</kbd> check / next · <kbd>←</kbd> <kbd>→</kbd> navigate · <kbd>M</kbd> bookmark</p>
+    </div>
+  </section>
+
+  <!-- ===================== QUIZ ===================== -->
+  <section id="quiz" class="hidden">
+    <div class="card">
+      <div class="qhead">
+        <div><b id="qCounter"></b> <span class="muted" id="qLabel"></span></div>
+        <div class="row" style="margin:0">
+          <span class="timer hidden" id="timer"></span>
+          <span class="muted" id="liveScore"></span>
+          <button class="icon-btn" id="flagBtn" title="Bookmark (M)">☆ Bookmark</button>
+        </div>
+      </div>
+      <div class="progress"><div id="progBar"></div></div>
+      <div id="qTopics"></div>
+      <div class="qtext" id="qText"></div>
+      <div class="hint" id="qHint"></div>
+      <div id="options"></div>
+      <div id="feedback"></div>
+      <div class="nav">
+        <button class="btn" id="prevBtn">← Previous</button>
+        <div class="row" style="margin:0">
+          <button class="btn" id="quitBtn">Finish</button>
+          <button class="btn primary" id="actionBtn">Check</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Navigator</h2>
+      <div class="grid" id="navGrid"></div>
+    </div>
+  </section>
+
+  <!-- ===================== RESULTS ===================== -->
+  <section id="results" class="hidden">
+    <div class="card">
+      <p class="muted" style="margin:0">Your score</p>
+      <p class="score" id="scorePct"></p>
+      <p id="scoreText"></p>
+      <div class="row">
+        <button class="btn primary" id="againBtn">New quiz</button>
+        <button class="btn" id="retryWrongBtn">Retry wrong answers</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>By topic</h2>
+      <table id="topicTable"></table>
+    </div>
+    <div class="card">
+      <div class="qhead">
+        <h2 style="margin:0">Review</h2>
+        <div class="seg" id="reviewSeg">
+          <button data-v="wrong" class="on">Wrong / skipped</button>
+          <button data-v="all">All</button>
+        </div>
+      </div>
+      <div id="review"></div>
+    </div>
+  </section>
+</div>
+
+<script src="questions.js"></script>
+<script>
+(function () {
+  "use strict";
+  const ALL = window.QUESTIONS || [];
+  const LETTERS = "ABCDEF";
+  const $ = (id) => document.getElementById(id);
+  const byId = Object.fromEntries(ALL.map(q => [q.id, q]));
+
+  // ---------- persistence (per browser, fail-safe) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("dva_" + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem("dva_" + k, JSON.stringify(v)); } catch (e) {} }
+  };
+  let progress = store.get("progress", {});   // id -> {seen, correct, lastOk}
+  let flags = new Set(store.get("flags", []));
+  const saveProgress = () => store.set("progress", progress);
+  const saveFlags = () => store.set("flags", [...flags]);
+
+  // ---------- theme ----------
+  const root = document.documentElement;
+  const savedTheme = store.get("theme", null);
+  if (savedTheme) root.setAttribute("data-theme", savedTheme);
+  $("themeBtn").onclick = () => {
+    const cur = root.getAttribute("data-theme") ||
+      (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const next = cur === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next); store.set("theme", next);
+  };
+
+  // ---------- start screen ----------
+  const settings = { mode: "practice", pool: "all", topics: new Set() };
+  const allTopics = [...new Set(ALL.flatMap(q => q.topics))].sort();
+  allTopics.forEach(t => settings.topics.add(t));
+
+  function segment(id, key, after) {
+    $(id).querySelectorAll("button").forEach(b => b.onclick = () => {
+      $(id).querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+      settings[key] = b.dataset.v; after && after();
+    });
+  }
+  segment("modeSeg", "mode", updateStart);
+  segment("poolSeg", "pool", updateStart);
+
+  function renderChips() {
+    const counts = {};
+    ALL.forEach(q => q.topics.forEach(t => counts[t] = (counts[t] || 0) + 1));
+    $("topicChips").innerHTML = "";
+    allTopics.forEach(t => {
+      const c = document.createElement("button");
+      c.className = "chip" + (settings.topics.has(t) ? " on" : "");
+      c.textContent = `${t} (${counts[t]})`;
+      c.onclick = () => { settings.topics.has(t) ? settings.topics.delete(t) : settings.topics.add(t); renderChips(); updateStart(); };
+      $("topicChips").appendChild(c);
+    });
+  }
+  $("allTopics").onclick = () => {
+    if (settings.topics.size === allTopics.length) settings.topics.clear(); else allTopics.forEach(t => settings.topics.add(t));
+    renderChips(); updateStart();
+  };
+
+  function filteredPool() {
+    return ALL.filter(q => {
+      if (!q.topics.some(t => settings.topics.has(t))) return false;
+      const p = progress[q.id];
+      switch (settings.pool) {
+        case "file": return q.source === "file";
+        case "extra": return q.source === "extra";
+        case "wrong": return !!p && p.lastOk === false;
+        case "flag": return flags.has(q.id);
+        case "unseen": return !p;
+        default: return true;
+      }
+    });
+  }
+
+  function renderStats() {
+    const seen = Object.keys(progress).filter(id => byId[id]);
+    const correct = seen.filter(id => progress[id].lastOk).length;
+    const wrong = seen.filter(id => progress[id].lastOk === false).length;
+    const data = [
+      ["Total questions", ALL.length],
+      ["From your .txt", ALL.filter(q => q.source === "file").length],
+      ["Extra DVA-C02", ALL.filter(q => q.source === "extra").length],
+      ["Answered", seen.length],
+      ["Currently right", correct],
+      ["To revisit", wrong],
+    ];
+    $("stats").innerHTML = data.map(([k, v]) => `<div class="stat"><span class="muted">${k}</span><b>${v}</b></div>`).join("");
+  }
+
+  function updateStart() {
+    const pool = filteredPool();
+    $("modeDesc").textContent = settings.mode === "practice"
+      ? "Check each answer immediately and read the explanation."
+      : "Like the real exam: 65 questions, 130 minutes, results only at the end. Passing score is 720/1000 (~72%).";
+    $("timeWrap").classList.toggle("hidden", settings.mode !== "exam");
+    if (settings.mode === "exam" && !$("count").dataset.touched) $("count").value = Math.min(65, pool.length || 65);
+    $("poolInfo").textContent = `${pool.length} question(s) match your selection.`;
+    $("startBtn").disabled = pool.length === 0;
+  }
+  $("count").oninput = () => { $("count").dataset.touched = "1"; };
+
+  // ---------- quiz state ----------
+  let S = null;
+  let timerId = null;
+
+  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  function startQuiz(list) {
+    const n = Math.max(1, Math.min(parseInt($("count").value, 10) || 20, list.length));
+    const chosen = ($("shuffleQ").checked ? shuffle(list) : list.slice()).slice(0, n);
+    S = {
+      mode: settings.mode,
+      items: chosen.map(q => {
+        const idx = q.options.map((_, i) => i);
+        return { q, order: $("shuffleO").checked ? shuffle(idx) : idx, picked: new Set(), checked: false };
+      }),
+      i: 0,
+      endAt: settings.mode === "exam" ? Date.now() + (parseInt($("minutes").value, 10) || 130) * 60000 : null,
+    };
+    show("quiz");
+    if (S.endAt) { tick(); timerId = setInterval(tick, 1000); }
+    renderQ();
+  }
+
+  function tick() {
+    const left = Math.max(0, S.endAt - Date.now());
+    const m = Math.floor(left / 60000), s = Math.floor(left / 1000) % 60;
+    $("timer").textContent = `⏱ ${m}:${String(s).padStart(2, "0")}`;
+    $("timer").classList.toggle("low", left < 5 * 60000);
+    if (left <= 0) finish();
+  }
+
+  const isCorrect = (it) => it.picked.size === it.q.answer.length && it.q.answer.every(a => it.picked.has(a));
+
+  function renderQ() {
+    const it = S.items[S.i], q = it.q, exam = S.mode === "exam";
+    const reveal = !exam && it.checked;
+    $("qCounter").textContent = `Question ${S.i + 1} of ${S.items.length}`;
+    $("qLabel").textContent = `· ${q.label}`;
+    $("progBar").style.width = `${((S.i + 1) / S.items.length) * 100}%`;
+    $("timer").classList.toggle("hidden", !exam);
+    const done = S.items.filter(x => x.checked);
+    $("liveScore").textContent = exam
+      ? `${S.items.filter(x => x.picked.size).length} answered`
+      : `✔ ${done.filter(isCorrect).length} / ${done.length}`;
+    $("flagBtn").classList.toggle("on", flags.has(q.id));
+    $("flagBtn").textContent = flags.has(q.id) ? "★ Bookmarked" : "☆ Bookmark";
+    $("qTopics").innerHTML = q.topics.map(t => `<span class="tag">${t}</span>`).join("");
+    $("qText").textContent = q.q;
+    $("qHint").textContent = q.answer.length > 1 ? `Select ${q.answer.length} answers` : "Select 1 answer";
+
+    const box = $("options"); box.innerHTML = "";
+    it.order.forEach((origIdx, pos) => {
+      const b = document.createElement("button");
+      b.className = "option";
+      b.innerHTML = `<span class="key">${LETTERS[pos]}</span><span></span>`;
+      b.lastChild.textContent = q.options[origIdx];
+      if (reveal) {
+        b.disabled = true;
+        if (q.answer.includes(origIdx)) b.classList.add("correct");
+        else if (it.picked.has(origIdx)) b.classList.add("wrong");
+      } else {
+        if (it.picked.has(origIdx)) b.classList.add("selected");
+        b.onclick = () => pick(origIdx);
+      }
+      box.appendChild(b);
+    });
+
+    const fb = $("feedback");
+    if (reveal) {
+      const ok = isCorrect(it);
+      const right = it.order.map((o, p) => q.answer.includes(o) ? LETTERS[p] : null).filter(Boolean).join(", ");
+      fb.innerHTML = `<div class="feedback ${ok ? "good" : "bad"}"><b>${ok ? "✔ Correct!" : "✘ Incorrect — correct answer: " + right}</b><span></span></div>`;
+      fb.querySelector("span").textContent = q.explanation || "";
+    } else fb.innerHTML = "";
+
+    $("prevBtn").disabled = S.i === 0;
+    const last = S.i === S.items.length - 1, btn = $("actionBtn");
+    btn.disabled = false;
+    if (exam) btn.textContent = last ? "Submit exam" : "Next →";
+    else if (!it.checked) { btn.textContent = "Check"; btn.disabled = it.picked.size === 0; }
+    else btn.textContent = last ? "See results" : "Next →";
+    renderGrid();
+  }
+
+  function renderGrid() {
+    const g = $("navGrid"); g.innerHTML = "";
+    S.items.forEach((it, i) => {
+      const b = document.createElement("button");
+      b.textContent = i + 1;
+      if (S.mode === "practice" && it.checked) b.classList.add(isCorrect(it) ? "ok" : "no");
+      else if (it.picked.size) b.classList.add("answered");
+      if (flags.has(it.q.id)) b.classList.add("flag");
+      if (i === S.i) b.classList.add("cur");
+      b.onclick = () => { S.i = i; renderQ(); };
+      g.appendChild(b);
+    });
+  }
+
+  function pick(idx) {
+    const it = S.items[S.i];
+    if (S.mode === "practice" && it.checked) return;
+    if (it.q.answer.length > 1) {
+      if (it.picked.has(idx)) it.picked.delete(idx);
+      else if (it.picked.size < it.q.answer.length) it.picked.add(idx);
+    } else { it.picked.clear(); it.picked.add(idx); }
+    renderQ();
+  }
+
+  function record(it) {
+    const p = progress[it.q.id] || { seen: 0, correct: 0 };
+    const ok = isCorrect(it);
+    p.seen++; if (ok) p.correct++; p.lastOk = ok;
+    progress[it.q.id] = p;
+  }
+
+  function action() {
+    const it = S.items[S.i], last = S.i === S.items.length - 1;
+    if (S.mode === "practice" && !it.checked) {
+      if (!it.picked.size) return;
+      it.checked = true; record(it); saveProgress(); renderQ(); return;
+    }
+    if (last) {
+      if (S.mode === "exam") {
+        const un = S.items.filter(x => !x.picked.size).length;
+        if (un && !confirm(`${un} question(s) unanswered. Submit anyway?`)) return;
+      }
+      finish();
+    } else { S.i++; renderQ(); }
+  }
+
+  function finish() {
+    clearInterval(timerId); timerId = null;
+    if (S.mode === "exam" && !S.finished) { S.items.forEach(it => { it.checked = true; record(it); }); saveProgress(); }
+    S.finished = true;
+    const correct = S.items.filter(it => it.checked && isCorrect(it)).length;
+    const total = S.items.length, unchecked = S.items.filter(it => !it.checked).length;
+    const pct = Math.round((correct / total) * 100), pass = pct >= 72;
+    $("scorePct").textContent = `${pct}%`;
+    $("scorePct").className = "score " + (pass ? "pass" : "fail");
+    $("scoreText").textContent = `${correct} of ${total} correct` + (unchecked ? ` (${unchecked} not answered)` : "") +
+      ` · approx. scaled score ${Math.round(100 + pct * 9)} / 1000 — ${pass ? "PASS ✅ (720 needed)" : "below the 720 passing mark"}`;
+
+    const tp = {};
+    S.items.forEach(it => it.q.topics.forEach(t => { tp[t] = tp[t] || [0, 0]; tp[t][1]++; if (it.checked && isCorrect(it)) tp[t][0]++; }));
+    $("topicTable").innerHTML = "<tr><th>Topic</th><th>Score</th><th style='width:40%'></th></tr>" +
+      Object.entries(tp).sort((a, b) => a[1][0] / a[1][1] - b[1][0] / b[1][1]).map(([t, [c, n]]) => {
+        const p = Math.round(c / n * 100), col = p >= 72 ? "var(--good)" : p >= 50 ? "var(--accent)" : "var(--bad)";
+        return `<tr><td>${t}</td><td>${c}/${n} (${p}%)</td><td><div class="bar"><div style="width:${p}%;background:${col}"></div></div></td></tr>`;
+      }).join("");
+    renderReview("wrong");
+    show("results");
+    window.scrollTo(0, 0);
+  }
+
+  function renderReview(which) {
+    $("reviewSeg").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === which));
+    const box = $("review"); box.innerHTML = "";
+    const list = S.items.map((it, i) => [it, i]).filter(([it]) => which === "all" || !it.checked || !isCorrect(it));
+    if (!list.length) { box.innerHTML = "<p class='muted'>Nothing to review — all correct! 🎉</p>"; return; }
+    list.forEach(([it, i]) => {
+      const q = it.q, ok = it.checked && isCorrect(it);
+      const d = document.createElement("div"); d.className = "review-item";
+      const status = ok ? "<span class='pass'>✔ correct</span>" : `<span class='fail'>✘ ${it.picked.size ? "wrong" : "skipped"}</span>`;
+      d.innerHTML = `<div class="muted">#${i + 1} · ${q.label} · ${status}</div><div class="qtext"></div>`;
+      d.querySelector(".qtext").textContent = q.q;
+      it.order.forEach((o, p) => {
+        const r = document.createElement("div");
+        r.className = "option" + (q.answer.includes(o) ? " correct" : it.picked.has(o) ? " wrong" : "");
+        r.style.cursor = "default";
+        r.innerHTML = `<span class="key">${LETTERS[p]}</span><span></span>`;
+        r.lastChild.textContent = q.options[o] + (it.picked.has(o) ? "   ← your answer" : "");
+        d.appendChild(r);
+      });
+      const e = document.createElement("div"); e.className = "feedback " + (ok ? "good" : "bad"); e.textContent = q.explanation;
+      d.appendChild(e);
+      box.appendChild(d);
+    });
+  }
+  $("reviewSeg").querySelectorAll("button").forEach(b => b.onclick = () => renderReview(b.dataset.v));
+
+  function show(id) {
+    ["start", "quiz", "results"].forEach(s => $(s).classList.toggle("hidden", s !== id));
+    if (id === "start") { renderStats(); updateStart(); }
+  }
+
+  function toggleFlag() {
+    const id = S.items[S.i].q.id;
+    flags.has(id) ? flags.delete(id) : flags.add(id); saveFlags(); renderQ();
+  }
+
+  // ---------- wiring ----------
+  $("startBtn").onclick = () => startQuiz(filteredPool());
+  $("resetBtn").onclick = () => {
+    if (confirm("Clear all saved progress and bookmarks?")) { progress = {}; flags = new Set(); saveProgress(); saveFlags(); show("start"); }
+  };
+  $("actionBtn").onclick = action;
+  $("prevBtn").onclick = () => { if (S.i > 0) { S.i--; renderQ(); } };
+  $("flagBtn").onclick = toggleFlag;
+  $("quitBtn").onclick = () => {
+    if (S.mode === "exam") { if (confirm("Submit the exam now?")) finish(); }
+    else if (S.items.some(x => x.checked)) finish();
+    else show("start");
+  };
+  $("againBtn").onclick = () => show("start");
+  $("retryWrongBtn").onclick = () => {
+    const wrong = S.items.filter(it => !it.checked || !isCorrect(it)).map(it => it.q);
+    if (!wrong.length) { alert("No wrong answers to retry!"); return; }
+    settings.mode = "practice";
+    $("modeSeg").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === "practice"));
+    $("count").value = wrong.length;
+    startQuiz(wrong);
+  };
+
+  document.addEventListener("keydown", (e) => {
+    if ($("quiz").classList.contains("hidden") || e.target.tagName === "INPUT" || e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key.toUpperCase(), it = S.items[S.i];
+    let pos = /^[1-6]$/.test(k) ? +k - 1 : (k.length === 1 ? LETTERS.indexOf(k) : -1);
+    if (pos >= 0 && pos < it.order.length) { pick(it.order[pos]); return; }
+    if (e.key === "Enter") { e.preventDefault(); if (!$("actionBtn").disabled) action(); }
+    else if (e.key === "ArrowRight" && S.i < S.items.length - 1 && (S.mode === "exam" || it.checked)) { S.i++; renderQ(); }
+    else if (e.key === "ArrowLeft" && S.i > 0) { S.i--; renderQ(); }
+    else if (k === "M") toggleFlag();
+  });
+
+  renderChips();
+  show("start");
+})();
+</script>
+</body>
+</html>
